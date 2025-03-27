@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频下载列表</title>
+    <meta name="referrer" content="no-referrer">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .video-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .video-item {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 350px;
+            overflow: hidden;
+        }
+
+        .video-preview {
+            width: 100%;
+            height: auto;
+        }
+
+        .video-info {
+            padding: 15px;
+        }
+
+        .video-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .video-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .download-button {
+            display: block;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (min-width: 768px) {
+            .video-item {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .video-item {
+                width: calc(33.333% - 20px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="video-list" id="videoList"></div>
+    <script>
+        // 使用 fetch API 发送 AJAX 请求
+        var url = 'https://97gaoqian.com/dz/video/video.php';
+        fetch(url)
+          .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正常');
+                }
+                return response.json();
+            })
+          .then(data => {
+                const videoList = document.getElementById('videoList');
+                let videoElements = []; // 用于存储所有的 video 元素
+
+                data.forEach(video => {
+                    const videoItem = document.createElement('div');
+                    videoItem.classList.add('video-item');
+
+                    const videoPreview = document.createElement('video');
+                    videoPreview.classList.add('video-preview');
+                    videoPreview.controls = true;
+                    videoPreview.id = video.videoUrl; // 设置 video 的 id 为 videoUrl
+                    const source = document.createElement('source');
+                    source.src = video.videoUrl;
+                    source.type = 'video/mp4';
+                    videoPreview.appendChild(source);
+
+                    // 添加一个错误处理来捕获加载视频时的错误
+                    videoPreview.addEventListener('error', function() {
+                        console.error('视频加载错误:', videoPreview.error);
+                    });
+
+                    // 添加点击事件监听
+                    videoPreview.addEventListener('click', function() {
+                        const currentVideoUrl = videoPreview.id;
+                        // 遍历所有的 video 元素并暂停它们
+                        videoElements.forEach(v => {
+                            if (v.id !== currentVideoUrl) {
+                                v.pause();
+                            }
+                        });
+                        // 播放当前选中的视频
+                        videoPreview.play();
+                    });
+
+                    videoElements.push(videoPreview); // 将 video 元素添加到数组中
+
+                    const videoInfo = document.createElement('div');
+                    videoInfo.classList.add('video-info');
+
+                    const videoTitle = document.createElement('div');
+                    videoTitle.classList.add('video-title');
+                    videoTitle.textContent = video.title;
+
+                    const videoDescription = document.createElement('div');
+                    videoDescription.classList.add('video-description');
+                    videoDescription.textContent = video.description;
+
+                    const downloadButton = document.createElement('a');
+                    downloadButton.classList.add('download-button');
+                    downloadButton.href = video.videoUrl;
+                    downloadButton.download = video.fileName;
+                    downloadButton.textContent = '一键保存';
+
+                    videoInfo.appendChild(videoTitle);
+                    videoInfo.appendChild(videoDescription);
+                    videoInfo.appendChild(downloadButton);
+
+                    videoItem.appendChild(videoPreview);
+                    videoItem.appendChild(videoInfo);
+
+                    videoList.appendChild(videoItem);
+                });
+            })
+          .catch(error => {
+                console.error('获取数据时出错:', error);
+            });
+    </script>
+</body>
+
+</html>

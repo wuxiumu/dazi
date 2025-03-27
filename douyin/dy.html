@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>抖音账号文案信息表单</title>
+    <meta name="referrer" content="no-referrer" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            padding: 15px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 3px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            background-color: #1557b0;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .logo img {
+            width: 100px;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1a73e8;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .fullscreen-textarea {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            border: none;
+            border-radius: 0;
+            font-size: 16px;
+            padding: 15px;
+            background-color: white;
+        }
+
+        .exit-fullscreen {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 14px;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://archive.biliimg.com/bfs/archive/46cbeb6a658c8cbd0c449e1496bd987bdeea5680.jpg"
+                alt="抖音图标">
+        </div>
+        <h2 class="form-title">抖音账号文案信息表单</h2>
+        <form action="./dy.php" method="post">
+
+            <div class="form-group">
+                <label for="title">抖音号名称</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="douyin-id">抖音号码</label>
+                <input type="text" id="douyinid" name="douyinid" required>
+            </div>
+
+            <div class="form-group">
+                <label for="fans">粉丝数量</label>
+                <input type="number" id="fans" name="fans" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">抖音地址</label>
+                <input type="url" id="address" name="address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="copywriting">视频文案</label>
+                <textarea id="copywriting" name="copywriting" rows="5" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">提交信息</button>
+        </form>
+    </div>
+    <div class="exit-fullscreen" style="display: none;">退出全屏</div>
+    <script>
+        const textarea = document.getElementById('copywriting');
+        const exitButton = document.querySelector('.exit-fullscreen');
+
+        const timestamp = Date.now();
+        var dy_json_url ='./dy.json?'+timestamp;
+        fetch(dy_json_url)
+           .then(response => response.json())
+            .then(data => {
+                document.getElementById('title').value = data.title;
+                document.getElementById('douyinid').value = data.douyinid;
+                document.getElementById('fans').value = data.fans;
+                document.getElementById('address').value = data.address
+            })
+           .then(data => {
+                textarea.value = data;
+            })
+           .catch(error => {
+                console.error('读取文件时出现错误:', error);
+            });    
+            
+        textarea.addEventListener('click', function () {
+            if (!this.classList.contains('fullscreen-textarea')) {
+                this.classList.add('fullscreen-textarea');
+                exitButton.style.display = 'block';
+            }
+        });
+
+        exitButton.addEventListener('click', function () {
+            textarea.classList.remove('fullscreen-textarea');
+            this.style.display = 'none';
+        });
+
+        textarea.addEventListener('input', function () {
+            if (this.classList.contains('fullscreen-textarea')) {
+                this.scrollTop = this.scrollHeight;
+            }
+        });
+
+        var dz_txt_url ='./dz.txt?'+timestamp;
+        fetch(dz_txt_url)
+          .then(response => {
+                // 检查响应状态
+                if (!response.ok) {
+                    throw new Error('网络响应不正常');
+                }
+                // 以文本形式读取响应内容
+                return response.text();
+            })
+          .then(data => {
+                textarea.value = data;
+            })
+          .catch(error => {
+                console.error('获取文件内容时出错:', error);
+            });
+    </script>
+</body>
+
+</html>    
